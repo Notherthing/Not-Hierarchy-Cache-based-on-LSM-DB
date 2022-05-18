@@ -68,12 +68,14 @@ bool NHC_KV::nhc_get(const string &key, string &value){
 }
 
 void NHC_KV::nhc_set(const string &key,const string &value){
-    db->mainDB->leveldb_set(key, value);
     //先更新数据库,再尝试删除缓存
+    //修改了方案，先删除缓存，再更新数据库，由于leveldb在绝大多数情况下，写比读快
     if (cacheManange->cache.find(key)==cacheManange->cache.end()) {
+        db->mainDB->leveldb_set(key, value);
         return;
     }
     cacheManange->del(key);
+    db->mainDB->leveldb_set(key, value);
     return;
 }
 
